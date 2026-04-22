@@ -1,0 +1,414 @@
+#!/bin/bash
+# ─────────────────────────────────────────────────────────────────────────────
+#  Quick Reference: TokenPowerBench NF4 SLURM Submission
+# ─────────────────────────────────────────────────────────────────────────────
+#
+#  This file contains the most common commands for submitting and managing
+#  TokenPowerBench NF4 quantization jobs on a SLURM cluster.
+#
+#  Print this file for quick reference: print quick_reference.txt
+# ─────────────────────────────────────────────────────────────────────────────
+
+═══════════════════════════════════════════════════════════════════════════════
+ QUICK START
+═══════════════════════════════════════════════════════════════════════════════
+
+# Navigate to scripts directory
+cd /path/to/TokenPowerBench/scripts
+
+# Submit single-node job (4 hours, 1 GPU)
+sbatch submit_nf4_single_node.sh
+
+# Submit multi-node job (6 hours, 2 nodes with 8 GPUs each)
+sbatch submit_nf4_multi_node.sh
+
+# Check job status
+squeue --me
+
+
+═══════════════════════════════════════════════════════════════════════════════
+ SUBMISSION COMMANDS
+═══════════════════════════════════════════════════════════════════════════════
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Single-Node Jobs (Easiest Option)                                          │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+# Default: 1 GPU, 1 node, 4 hours
+sbatch submit_nf4_single_node.sh
+
+# With custom time (8 hours)
+sbatch --time=08:00:00 submit_nf4_single_node.sh
+
+# With custom memory (256 GB)
+sbatch --mem=256G submit_nf4_single_node.sh
+
+# Edit and customize, then submit
+vim submit_nf4_single_node.sh
+sbatch submit_nf4_single_node.sh
+
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Multi-Node Jobs (Distributed)                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+# Default: 2 nodes, 8 GPUs each, 6 hours
+sbatch submit_nf4_multi_node.sh
+
+# With 4 nodes
+sbatch --nodes=4 submit_nf4_multi_node.sh
+
+# With different time
+sbatch --time=12:00:00 --nodes=4 submit_nf4_multi_node.sh
+
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Interactive Submission (Recommended for Quick Changes)                     │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+# List help and examples
+./submit_nf4_jobs.sh help
+
+# Single node with defaults
+./submit_nf4_jobs.sh single
+
+# Multi-node with 4 nodes and 8-hour limit
+./submit_nf4_jobs.sh multi --nodes 4 --time 08:00:00
+
+# Custom model and batch sizes
+./submit_nf4_jobs.sh single \
+    --models Mistral-7B-nf4 \
+    --batch-sizes 16,32,64 \
+    --time 06:00:00
+
+
+═══════════════════════════════════════════════════════════════════════════════
+ JOB MONITORING COMMANDS
+═══════════════════════════════════════════════════════════════════════════════
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ View Job Status                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+# List all your jobs with condensed view
+squeue --me
+
+# List all jobs with more details
+squeue --me -l
+
+# Show specific job information
+scontrol show job 12345
+
+# Watch job updates live (refreshes every 5 seconds)
+watch -n 5 "squeue --me"
+
+# Get job efficiency after completion
+seff 12345
+
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ View Job Output                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+# Watch output as job runs
+tail -f logs/12345_nf4_single.out
+
+# View full output file
+cat logs/12345_nf4_single.out
+
+# View last 50 lines
+tail -n 50 logs/12345_nf4_single.out
+
+# View error messages
+cat logs/12345_nf4_single.err
+
+# Search for specific text in output
+grep "Error\|Warning" logs/12345_nf4_single.out
+
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Check Resource Usage                                                        │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+# Show CPU, memory, time usage for running job
+scontrol show job 12345 | grep -E "TimeLimit|RunTime|AllocCPU|AllocMem"
+
+# Show detailed resource stats (job must be running)
+sstat --jobid=12345 --format=JobID,NTasks,AveCPU,AvePages,AveRSS
+
+# GPU usage (from script output)
+grep -i "gpu\|cuda\|vram" logs/12345_nf4_single.out
+
+
+═══════════════════════════════════════════════════════════════════════════════
+ JOB CONTROL COMMANDS
+═══════════════════════════════════════════════════════════════════════════════
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Cancel / Hold / Resume Jobs                                                 │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+# Cancel a job (stops execution)
+scancel 12345
+
+# Cancel all your jobs
+scancel -u $(whoami)
+
+# Hold a job (stays in queue, won't run)
+scontrol hold 12345
+
+# Release a held job (allows it to run)
+scontrol release 12345
+
+# Cancel job if it takes longer than 5 hours
+sbatch --time-min=00:01:00 --time=05:00:00 submit_nf4_single_node.sh
+
+
+═══════════════════════════════════════════════════════════════════════════════
+ COMMON CONFIGURATIONS
+═══════════════════════════════════════════════════════════════════════════════
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Small Model (8B) - Fast Test Run (30 minutes)                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+sbatch --time=00:30:00 \
+       --mem=96G \
+       submit_nf4_single_node.sh
+
+# Then in script, set:
+#   NUM_SAMPLES=10
+#   BATCH_SIZES="32"
+
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Medium Benchmark (70B Model) - 2 hours                                      │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+sbatch --time=02:00:00 \
+       --mem=256G \
+       --cpus-per-task=32 \
+       submit_nf4_single_node.sh
+
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Large Scale (Multi-GPU) - Distributed Benchmark - 6 hours                   │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+sbatch --nodes=4 \
+       --time=06:00:00 \
+       --gpus-per-node=gpu:nvidia_h100_nvl:8 \
+       submit_nf4_multi_node.sh
+
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Multiple Concurrent Jobs (Array Submission)                                 │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+# Submit 3 identical jobs as array
+sbatch --array=1-3 submit_nf4_single_node.sh
+
+# List array job and its elements
+squeue --me --array
+
+
+═══════════════════════════════════════════════════════════════════════════════
+ TROUBLESHOOTING
+═══════════════════════════════════════════════════════════════════════════════
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Job Won't Start                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+# Check why job is pending
+scontrol show job 12345 | grep -i reason
+
+# List available partitions
+sinfo
+
+# List available GPU types
+sinfo -o "%20N %10G %6t %32R"
+
+# Check cluster resources
+sinfo --format="%20N %10c %20m %20G %6t %32R"
+
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Job Crashes or Errors                                                       │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+# Check error log
+cat logs/<job_id>_nf4_single.err
+
+# Search for error in output
+grep -i "error\|exception\|traceback" logs/<job_id>_nf4_single.out
+
+# Re-submit with debug mode
+sbatch --time=01:00:00 submit_nf4_custom.sh  # Run shorter test first
+
+# Check CUDA compatibility
+srun -N 1 -n 1 gpu-test.sh  # Or use: nvidia-smi
+
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Out of Memory (OOM)                                                         │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+# Increase memory allocation
+sbatch --mem=256G submit_nf4_single_node.sh
+
+# Reduce batch size in script
+# Edit: --batch-sizes "32,64,128" → "16,32"
+
+# Reduce number of samples
+# Edit: --num-samples 100 → --num-samples 10
+
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Timeout Issues                                                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+# Increase time limit
+sbatch --time=08:00:00 submit_nf4_single_node.sh
+
+# Estimate time on small run first
+sbatch --time=00:30:00 --mem=96G submit_nf4_single_node.sh
+# Then check: seff <job_id>
+
+
+═══════════════════════════════════════════════════════════════════════════════
+ ADVANCED USAGE
+═══════════════════════════════════════════════════════════════════════════════
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Job Dependencies                                                            │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+# Run job after another job completes successfully
+sbatch --dependency=afterok:12345 submit_nf4_single_node.sh
+
+# Run job after another job starts
+sbatch --dependency=afterstart:12345 submit_nf4_single_node.sh
+
+# Run job if another job fails
+sbatch --dependency=afternotok:12345 submit_nf4_single_node.sh
+
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Email Notifications                                                         │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+# Get email when job starts and ends
+sbatch --mail-type=BEGIN,END \
+       --mail-user=your.email@university.edu \
+       submit_nf4_single_node.sh
+
+# Notify on failure only
+sbatch --mail-type=FAIL \
+       --mail-user=your.email@university.edu \
+       submit_nf4_single_node.sh
+
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ Priority / QoS Settings                                                     │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+# Set priority (higher number = higher priority)
+sbatch --priority=1000 submit_nf4_single_node.sh
+
+# Use specific Quality of Service if available
+sbatch --qos=gpu_high submit_nf4_single_node.sh
+
+
+═══════════════════════════════════════════════════════════════════════════════
+ SYSTEM INFORMATION
+═══════════════════════════════════════════════════════════════════════════════
+
+# Show cluster overview
+sinfo
+
+# Show detailed node information
+scontrol show nodes | head -50
+
+# Show all available partitions
+sinfo -a
+
+# Show GPU availability by node
+sinfo --gres=gpu
+
+# List all jobs on cluster (admin view)
+squeue  # Or use: squeue -a
+
+
+═══════════════════════════════════════════════════════════════════════════════
+ COMMON SBATCH OPTIONS REFERENCE
+═══════════════════════════════════════════════════════════════════════════════
+
+#SBATCH --job-name=NAME              # Job name
+#SBATCH --partition=NAME              # Queue/partition name
+#SBATCH --nodes=N                      # Number of nodes
+#SBATCH --ntasks=N                     # Total number of tasks
+#SBATCH --ntasks-per-node=N            # Tasks per node
+#SBATCH --cpus-per-task=N              # CPUs per task
+#SBATCH --mem=XG                       # Memory per node (X in GB)
+#SBATCH --mem-per-cpu=XM               # Memory per CPU
+#SBATCH --gres=gpu:TYPE:N              # GPU resources
+#SBATCH --time=HH:MM:SS                # Wall time limit
+#SBATCH --output=FILE                  # Output file (stdout)
+#SBATCH --error=FILE                   # Error file (stderr)
+#SBATCH --mail-type=TYPE               # Email notification (BEGIN, END, FAIL)
+#SBATCH --mail-user=EMAIL              # Email address
+#SBATCH --array=1-N:M                  # Job array (N tasks, step M)
+#SBATCH --dependency=CONDITION:JOB_ID  # Job dependencies
+#SBATCH --priority=NUMBER              # Job priority
+
+
+═══════════════════════════════════════════════════════════════════════════════
+ ENVIRONMENT VARIABLES (Set in script)
+═══════════════════════════════════════════════════════════════════════════════
+
+$SLURM_JOB_ID              Current job ID
+$SLURM_JOB_NAME            Job name
+$SLURM_JOB_NODELIST        List of nodes assigned
+$SLURM_JOB_NUM_NODES       Number of nodes
+$SLURM_CPUS_PER_TASK       Number of CPUs allocated per task
+$SLURM_NTASKS              Total number of tasks
+$SLURM_ARRAY_TASK_ID       Task ID in array job
+
+
+═══════════════════════════════════════════════════════════════════════════════
+ TIPS & TRICKS
+═════════════════════════════════════════════════════════════════════════════════
+
+✓ Always test on small scale first before scaling up
+✓ Add 20% buffer to time estimates
+✓ Use job dependencies to chain related jobs
+✓ Save results immediately after job completes
+✓ Archive large result directories (.tar.gz)
+✓ Check error logs first when jobs fail
+✓ Use seff command for job efficiency analysis
+✓ Set appropriate memory to avoid OOM errors
+✓ Monitor cluster usage to pick good submission times
+✓ Document your job configurations for reproducibility
+
+
+═════════════════════════════════════════════════════════════════════════════════
+ HELP & DOCUMENTATION
+═════════════════════════════════════════════════════════════════════════════════
+
+Full SLURM Job Submission Guide:
+  cat SLURM_JOB_SUBMISSION.md
+
+NF4 Quantization Documentation:
+  cat ../NF4_QUANTIZATION.md
+
+TokenPowerBench README:
+  cat ../README.md
+
+SLURM Manual:
+  man sbatch
+  man squeue
+  man scancel
+
+Get help in script:
+  ./submit_nf4_jobs.sh help
