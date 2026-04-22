@@ -30,11 +30,17 @@ echo ""
 # Set Python path for local packages
 export PYTHONPATH="$HOME/.local/lib/python3.11/site-packages:$PYTHONPATH"
 
-# HuggingFace cache — point to a large scratch space, not your home dir
-export HF_HOME="/scratch/$USER/huggingface_cache"
+# HuggingFace cache — try /scratch first, fallback to $HOME if permission denied
+if [ -w /scratch ] 2>/dev/null; then
+    export HF_HOME="/scratch/$USER/huggingface_cache"
+    echo "✓ Using /scratch for HuggingFace cache"
+else
+    export HF_HOME="$HOME/.cache/huggingface"
+    echo "⚠ Using home directory for HuggingFace cache (/scratch not writable)"
+fi
 export TRANSFORMERS_CACHE="$HF_HOME"
 export HF_DATASETS_CACHE="$HF_HOME/datasets"
-mkdir -p "$HF_HOME" "$HF_HOME/datasets"
+mkdir -p "$HF_HOME" "$HF_HOME/datasets" 2>/dev/null || true
 
 # Disable NCCL timeouts for long-running jobs (optional)
 export NCCL_TIMEOUT=1800
@@ -81,17 +87,26 @@ mkdir -p "$OUTPUT_DIR"
 echo "=== Starting NF4 Single-Node Benchmark ==="
 echo "Model Dir: $MODEL_DIR"
 echo "Output Dir: $OUTPUT_DIR"
+echo "HF Cache: $HF_HOME"
 echo ""
 
+# Verify model exists
+MODEL_PATH="$MODEL_DIR/Llama-3.1-8B-nf4"
+if [ ! -d "$MODEL_PATH" ]; then
+    echo "❌ ERROR: Model not found at $MODEL_PATH"
+    echo "Available models in $MODEL_DIR:"
+    ls -la "$MODEL_DIR/" 2>/dev/null || echo "Model directory not found"
+    exit 1
+fi
+
 python3.11 run_single_node.py \
-    --model-path "$MODEL_DIR/Llama-3.1-8B-nf4" \
-    --datasets "alpaca" \
+    --model "$MODEL_PATH" \
+    --dataset "alpaca" \
     --batch-sizes "32,64,128" \
     --num-samples 100 \
-    --max-tokens 256 \
-    --temperature 0.7 \
-    --output-dir "$OUTPUT_DIR" \
-    --verbose
+    --output-tokens 256 \
+    --monitor auto \
+    --output-dir "$OUTPUT_DIR"
 
 BENCHMARK_EXIT=$?
 

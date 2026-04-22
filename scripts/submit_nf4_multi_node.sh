@@ -32,11 +32,17 @@ echo ""
 # Set Python path for local packages
 export PYTHONPATH="$HOME/.local/lib/python3.11/site-packages:$PYTHONPATH"
 
-# HuggingFace cache — point to a large scratch space, not your home dir
-export HF_HOME="/scratch/$USER/huggingface_cache"
+# HuggingFace cache — try /scratch first, fallback to $HOME if permission denied
+if [ -w /scratch ] 2>/dev/null; then
+    export HF_HOME="/scratch/$USER/huggingface_cache"
+    echo "✓ Using /scratch for HuggingFace cache"
+else
+    export HF_HOME="$HOME/.cache/huggingface"
+    echo "⚠ Using home directory for HuggingFace cache (/scratch not writable)"
+fi
 export TRANSFORMERS_CACHE="$HF_HOME"
 export HF_DATASETS_CACHE="$HF_HOME/datasets"
-mkdir -p "$HF_HOME" "$HF_HOME/datasets"
+mkdir -p "$HF_HOME" "$HF_HOME/datasets" 2>/dev/null || true
 
 # Ray and distributed computing settings
 export NCCL_TIMEOUT=3600
@@ -147,6 +153,18 @@ echo ""
 echo "=== Starting NF4 Multi-Node Benchmark ==="
 echo "Model Dir: $MODEL_DIR"
 echo "Output Dir: $OUTPUT_DIR"
+echo "HF Cache: $HF_HOME"
+echo "Ray Head: $HEAD_NODE_IP:$RAY_PORT"
+echo ""
+
+# Verify models exist
+for model in Llama-3.1-8B-nf4 Mistral-7B-nf4; do
+    MODEL_PATH="$MODEL_DIR/$model"
+    if [ ! -d "$MODEL_PATH" ]; then
+        echo "❌ WARNING: Model not found at $MODEL_PATH"
+        echo "   This model will be skipped or cause failure"
+    fi
+done
 echo ""
 
 python3.11 run_multi_node.py \
@@ -160,10 +178,10 @@ python3.11 run_multi_node.py \
     --num-samples 50 \
     --max-tokens 256 \
     --temperature 0.7 \
+    --monitor auto \
     --ray-head-address "$HEAD_NODE_IP" \
     --ray-head-port $RAY_PORT \
-    --output-dir "$OUTPUT_DIR" \
-    --verbose
+    --output-dir "$OUTPUT_DIR"
 
 BENCHMARK_EXIT=$?
 

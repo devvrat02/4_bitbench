@@ -74,11 +74,15 @@ VERBOSE="${VERBOSE:-1}"
 # Set Python path for local packages
 export PYTHONPATH="$HOME/.local/lib/python3.11/site-packages:$PYTHONPATH"
 
-# HuggingFace cache — point to a large scratch space, not your home dir
-export HF_HOME="/scratch/$USER/huggingface_cache"
+# HuggingFace cache — try /scratch first, fallback to $HOME if permission denied
+if [ -w /scratch ] 2>/dev/null; then
+    export HF_HOME="/scratch/$USER/huggingface_cache"
+else
+    export HF_HOME="$HOME/.cache/huggingface"
+fi
 export TRANSFORMERS_CACHE="$HF_HOME"
 export HF_DATASETS_CACHE="$HF_HOME/datasets"
-mkdir -p "$HF_HOME" "$HF_HOME/datasets"
+mkdir -p "$HF_HOME" "$HF_HOME/datasets" 2>/dev/null || true
 
 # Disable NCCL timeouts (for long-running jobs)
 export NCCL_TIMEOUT=3600
