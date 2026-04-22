@@ -22,8 +22,15 @@ class VLLMEngine:
         """Initialize the vLLM engine."""
         self.available = VLLM_AVAILABLE
     
-    def setup_model(self, model_path, gpu_memory_utilization=0.9, max_model_len=None):
-        """Initialize a vLLM model."""
+    def setup_model(self, model_path, gpu_memory_utilization=0.9, max_model_len=None, quantization=None):
+        """Initialize a vLLM model.
+        
+        Args:
+            model_path: Path to the model
+            gpu_memory_utilization: GPU memory utilization ratio (0-1)
+            max_model_len: Maximum model context length
+            quantization: Quantization method ('fp8', 'nf4', 'int4', 'int8', or None)
+        """
         if not self.available:
             print("vLLM is not available. Please install it first.")
             return None
@@ -47,6 +54,15 @@ class VLLMEngine:
             
             os.environ["VLLM_ALLOW_LONG_MAX_MODEL_LEN"] = "1"
             
+            # Auto-detect quantization from model name if not specified
+            if quantization is None:
+                model_name = os.path.basename(model_path).lower()
+                if "nf4" in model_name:
+                    quantization = "nf4"
+                    print(f"Auto-detected NF4 quantization from model name")
+                elif "fp8" in model_name or "405b" in model_name:
+                    quantization = "fp8"
+                    print(f"Auto-detected FP8 quantization from model name")
 
             if max_model_len is None:
                 try:
@@ -61,16 +77,26 @@ class VLLMEngine:
                     max_model_len = 1024
             
             print(f"Using max_model_len: {max_model_len}")
+            if quantization:
+                print(f"Using quantization: {quantization}")
             
             # Initialize model with specified parameters
             from vllm import LLM
-            llm = LLM(
-                model=model_path,
-                gpu_memory_utilization=gpu_memory_utilization,
-                max_model_len=max_model_len,
-                tensor_parallel_size=tensor_parallel_size,
-                trust_remote_code=True
-            )
+            
+            # Build LLM kwargs
+            llm_kwargs = {
+                "model": model_path,
+                "gpu_memory_utilization": gpu_memory_utilization,
+                "max_model_len": max_model_len,
+                "tensor_parallel_size": tensor_parallel_size,
+                "trust_remote_code": True
+            }
+            
+            # Add quantization if specified
+            if quantization:
+                llm_kwargs["quantization"] = quantization
+            
+            llm = LLM(**llm_kwargs)
             print(f"Model loaded successfully from {model_path}")
             
             self.llm = llm

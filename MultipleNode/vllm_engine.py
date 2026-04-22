@@ -397,6 +397,25 @@ class VLLMPredictor:
                     load_format="auto",
                     dtype="auto"
                 )
+            elif "nf4" in model_name:
+                # NF4 (4-bit Normal Float) quantized model configuration
+                print(f"   Applying NF4 quantization model configuration...")
+                self.llm = LLM(
+                    model=self.model_path,
+                    tensor_parallel_size=self.tensor_parallel_size,
+                    pipeline_parallel_size=self.pipeline_parallel_size,
+                    quantization="nf4",
+                    gpu_memory_utilization=0.95,
+                    max_model_len=8192,
+                    trust_remote_code=True,
+                    enforce_eager=True,
+                    max_num_batched_tokens=4096,
+                    max_num_seqs=16,
+                    enable_prefix_caching=True,
+                    distributed_executor_backend="ray",
+                    load_format="auto",
+                    dtype="auto"
+                )
             elif "70b" in model_name:
                 # 70B model configuration
                 self.llm = LLM(

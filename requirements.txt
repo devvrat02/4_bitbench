@@ -14,6 +14,9 @@ pynvml>=11.0.0
 # vLLM - for high-performance distributed LLM inference
 vllm>=0.6.0
 
+# BitsAndBytes - for 4-bit and 8-bit quantization (NF4, INT4, INT8, etc.)
+bitsandbytes>=0.41.0
+
 # Transformers - Hugging Face transformers library
 transformers>=4.30.0
 accelerate>=0.20.0

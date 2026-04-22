@@ -38,6 +38,7 @@ class VLLMEngine(InferenceEngine):
         model_path: str,
         gpu_memory_utilization: float = 0.9,
         max_model_len: Optional[int] = None,
+        quantization: Optional[str] = None,
     ) -> Optional[LLM]:
         """Load a model from local path.
 
@@ -49,6 +50,9 @@ class VLLMEngine(InferenceEngine):
             Fraction of GPU memory vLLM may use (default 0.9).
         max_model_len : int, optional
             Override the context length. Auto-detected from config.json if None.
+        quantization : str, optional
+            Quantization method ('fp8', 'nf4', 'int4', 'int8', or None).
+            Auto-detected from model name if None.
         """
         if not self.available:
             print("[VLLMEngine] vLLM is not installed.")
@@ -61,17 +65,36 @@ class VLLMEngine(InferenceEngine):
         if max_model_len is None:
             max_model_len = _read_max_position_embeddings(model_path)
 
+        # Auto-detect quantization from model name if not specified
+        if quantization is None:
+            model_name = os.path.basename(model_path).lower()
+            if "nf4" in model_name:
+                quantization = "nf4"
+                print("[VLLMEngine] Auto-detected NF4 quantization from model name")
+            elif "fp8" in model_name or "405b" in model_name:
+                quantization = "fp8"
+                print("[VLLMEngine] Auto-detected FP8 quantization from model name")
+
         os.environ["VLLM_ALLOW_LONG_MAX_MODEL_LEN"] = "1"
         print(f"[VLLMEngine] Loading {model_path}  TP={tp}  max_len={max_model_len}")
+        if quantization:
+            print(f"[VLLMEngine] Quantization: {quantization}")
 
         try:
-            self._llm = LLM(
-                model=model_path,
-                tensor_parallel_size=tp,
-                gpu_memory_utilization=gpu_memory_utilization,
-                max_model_len=max_model_len,
-                trust_remote_code=True,
-            )
+            # Build LLM kwargs
+            llm_kwargs = {
+                "model": model_path,
+                "tensor_parallel_size": tp,
+                "gpu_memory_utilization": gpu_memory_utilization,
+                "max_model_len": max_model_len,
+                "trust_remote_code": True,
+            }
+            
+            # Add quantization if specified
+            if quantization:
+                llm_kwargs["quantization"] = quantization
+            
+            self._llm = LLM(**llm_kwargs)
             print("[VLLMEngine] Model loaded.")
             return self._llm
         except Exception as exc:

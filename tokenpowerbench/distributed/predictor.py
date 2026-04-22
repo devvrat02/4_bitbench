@@ -18,6 +18,7 @@ from vllm import LLM, SamplingParams
 # Model-size detection keywords → vLLM constructor kwargs
 _MODEL_CONFIGS: List[tuple] = [
     # (keyword_in_model_name, kwargs)
+    # 405B models - FP8 quantization recommended for efficiency
     ("405b", dict(
         quantization="fp8",
         gpu_memory_utilization=0.85,
@@ -25,6 +26,7 @@ _MODEL_CONFIGS: List[tuple] = [
         max_num_batched_tokens=1024,
         max_num_seqs=4,
     )),
+    # 70B models - default configuration
     ("70b", dict(
         gpu_memory_utilization=0.90,
         max_model_len=4096,
@@ -38,6 +40,15 @@ _MODEL_CONFIGS: List[tuple] = [
         max_model_len=4096,
         max_num_batched_tokens=2048,
         max_num_seqs=8,
+    )),
+    # NF4 (4-bit Normal Float) quantized models
+    # Use this for pre-quantized NF4 models or models that support NF4 quantization
+    ("nf4", dict(
+        quantization="nf4",
+        gpu_memory_utilization=0.95,
+        max_model_len=8192,
+        max_num_batched_tokens=4096,
+        max_num_seqs=16,
     )),
     # Default for smaller models (≤ 8B)
     ("", dict(
