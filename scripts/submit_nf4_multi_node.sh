@@ -157,27 +157,40 @@ echo "HF Cache: $HF_HOME"
 echo "Ray Head: $HEAD_NODE_IP:$RAY_PORT"
 echo ""
 
-# Verify models exist
-for model in Llama-3.1-8B-nf4 Mistral-7B-nf4; do
-    MODEL_PATH="$MODEL_DIR/$model"
-    if [ ! -d "$MODEL_PATH" ]; then
-        echo "❌ WARNING: Model not found at $MODEL_PATH"
-        echo "   This model will be skipped or cause failure"
+# Auto-detect available models
+AVAILABLE_MODELS=""
+for dir in "$MODEL_DIR"/*; do
+    if [ -d "$dir" ]; then
+        model_name=$(basename "$dir")
+        if [ -f "$dir/config.json" ]; then
+            echo "✓ Found model: $model_name"
+            if [ -z "$AVAILABLE_MODELS" ]; then
+                AVAILABLE_MODELS="$model_name"
+            else
+                AVAILABLE_MODELS="$AVAILABLE_MODELS,$model_name"
+            fi
+        fi
     fi
 done
+
+if [ -z "$AVAILABLE_MODELS" ]; then
+    echo "❌ ERROR: No models found in $MODEL_DIR"
+    echo "Download models first:"
+    echo "  bash scripts/download_models.sh mistral"
+    exit 1
+fi
+echo "Using models: $AVAILABLE_MODELS"
 echo ""
 
 python3.11 run_multi_node.py \
-    --models "Llama-3.1-8B-nf4,Mistral-7B-nf4" \
+    --models "$AVAILABLE_MODELS" \
     --model-dir "$MODEL_DIR" \
-    --datasets "alpaca,wikitext" \
+    --datasets "alpaca" \
     --batch-sizes "64,128" \
-    --tensor-parallel "2,4" \
-    --pipeline-parallel "1,2" \
-    --concurrency "1,2" \
+    --tensor-parallel "1" \
+    --pipeline-parallel "1" \
     --num-samples 50 \
-    --max-tokens 256 \
-    --temperature 0.7 \
+    --output-tokens 256 \
     --monitor auto \
     --ray-head-address "$HEAD_NODE_IP" \
     --ray-head-port $RAY_PORT \

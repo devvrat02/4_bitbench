@@ -136,20 +136,7 @@ check_requirements() {
         echo "  ⚠️ Could not determine disk space (continuing anyway)"
     fi
     
-    # Check huggingface-hub Python module - install if missing
-    if ! python3 -c "import huggingface_hub" 2>/dev/null; then
-        echo "  📥 huggingface-hub not found, installing..."
-        pip install -q huggingface-hub 2>/dev/null
-        if ! python3 -c "import huggingface_hub" 2>/dev/null; then
-            echo "  ❌ Failed to install huggingface-hub"
-            echo "    Try manually: pip install huggingface-hub"
-            exit 1
-        fi
-        echo "  ✓ huggingface-hub installed"
-    else
-        echo "  ✓ huggingface-hub module found"
-    fi
-    
+    echo "  ✓ Python3 available: $(which python3)"
     echo "  ✓ Models directory: $MODELS_DIR"
     echo ""
 }
@@ -175,22 +162,53 @@ download_model() {
     
     mkdir -p "$local_dir"
     
-    # Use Python module approach since huggingface-cli might not be in PATH
-    if python3 -m huggingface_hub.cli download "$model_id" \
-        --local-dir "$local_dir" \
-        --local-dir-use-symlinks False \
-        --cache-dir "$HOME/.cache/huggingface" 2>/dev/null; then
-        echo "   ✓ Downloaded successfully"
+    # Detect which Python has huggingface_hub and use it
+    local python_cmd="python3"
+    if command -v python3.11 &> /dev/null; then
+        python_cmd="python3.11"
+    fi
+    
+    # Set PYTHONPATH to include user site-packages
+    export PYTHONPATH="${HOME}/.local/lib/python3.11/site-packages:${PYTHONPATH}"
+    
+    # Use Python directly to download
+    $python_cmd << PYTHON_END
+import sys
+import os
+
+model_id = "$model_id"
+local_dir = "$local_dir"
+
+try:
+    from huggingface_hub import snapshot_download
+    
+    print(f"   Downloading to {local_dir}...")
+    snapshot_download(
+        repo_id=model_id,
+        local_dir=local_dir,
+        local_dir_use_symlinks=False,
+        cache_dir=os.path.expanduser("~/.cache/huggingface")
+    )
+    print("   ✓ Downloaded successfully")
+    sys.exit(0)
+except Exception as e:
+    print(f"   ❌ Download failed: {e}")
+    import traceback
+    traceback.print_exc()
+    sys.exit(1)
+PYTHON_END
+    
+    local status=$?
+    if [ $status -eq 0 ]; then
         return 0
     else
-        echo "   ❌ Download failed"
         echo "   Common reasons:"
         echo "     1. Model requires approval (gated model)"
         echo "     2. Not logged in to HuggingFace"
         echo "     3. Network issues"
         echo "   Solutions:"
         echo "     1. Run: huggingface-cli login"
-        echo "     2. Visit https://huggingface.co/meta-llama/Llama-3.1-8B"
+        echo "     2. Visit https://huggingface.co/mistralai/Mistral-7B-Instruct-v0.2"
         echo "     3. Click 'Request access' and complete form"
         echo "     4. Try again after approval"
         return 1

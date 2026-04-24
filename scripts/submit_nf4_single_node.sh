@@ -90,14 +90,27 @@ echo "Output Dir: $OUTPUT_DIR"
 echo "HF Cache: $HF_HOME"
 echo ""
 
-# Verify model exists
-MODEL_PATH="$MODEL_DIR/Llama-3.1-8B-nf4"
-if [ ! -d "$MODEL_PATH" ]; then
-    echo "❌ ERROR: Model not found at $MODEL_PATH"
-    echo "Available models in $MODEL_DIR:"
-    ls -la "$MODEL_DIR/" 2>/dev/null || echo "Model directory not found"
+# Auto-detect model - prefer available models in order
+MODEL_PATH=""
+if [ -d "$MODEL_DIR/Mistral-7B-Instruct-v0.2" ]; then
+    MODEL_PATH="$MODEL_DIR/Mistral-7B-Instruct-v0.2"
+    echo "✓ Using Mistral-7B-Instruct-v0.2"
+elif [ -d "$MODEL_DIR/Llama-3.1-8B" ]; then
+    MODEL_PATH="$MODEL_DIR/Llama-3.1-8B"
+    echo "✓ Using Llama-3.1-8B"
+elif [ -d "$MODEL_DIR/Qwen2.5-7B-Instruct" ]; then
+    MODEL_PATH="$MODEL_DIR/Qwen2.5-7B-Instruct"
+    echo "✓ Using Qwen2.5-7B-Instruct"
+else
+    echo "❌ ERROR: No supported models found in $MODEL_DIR"
+    echo "Available models:"
+    ls -la "$MODEL_DIR/" 2>/dev/null || echo "  (directory not found)"
+    echo ""
+    echo "Download models first:"
+    echo "  bash scripts/download_models.sh mistral"
     exit 1
 fi
+echo ""
 
 python3.11 run_single_node.py \
     --model "$MODEL_PATH" \
