@@ -116,25 +116,40 @@ EOF
 check_requirements() {
     echo "📋 Checking requirements..."
     
-    # Check disk space
-    local available=$(df -BG "$MODELS_DIR" 2>/dev/null | tail -1 | awk '{print $4}' | sed 's/G//')
-    echo "  ✓ Disk space available: ${available}GB"
+    # Create models directory first (for df check)
+    mkdir -p "$MODELS_DIR" 2>/dev/null
     
-    if [ "$available" -lt 60 ]; then
-        echo "  ⚠️ WARNING: Less than 60GB available"
-        echo "    Single 8B model needs ~50GB. Multiple models need more space."
+    # Check disk space - use parent directory if MODELS_DIR is new
+    local check_path="$MODELS_DIR"
+    if [ ! -d "$check_path" ]; then
+        check_path=$(dirname "$MODELS_DIR")
     fi
     
-    # Check huggingface-cli
+    local available=$(df "$check_path" 2>/dev/null | tail -1 | awk '{print int($4/1024/1024)}')
+    if [ -n "$available" ] && [ "$available" -gt 0 ]; then
+        echo "  ✓ Disk space available: ${available}GB"
+        if [ "$available" -lt 60 ]; then
+            echo "  ⚠️ WARNING: Less than 60GB available"
+            echo "    Single 8B model needs ~50GB. Multiple models need more space."
+        fi
+    else
+        echo "  ⚠️ Could not determine disk space (continuing anyway)"
+    fi
+    
+    # Check huggingface-cli - install if missing
     if ! command -v huggingface-cli &> /dev/null; then
-        echo "  ❌ huggingface-cli not found"
-        echo "    Install with: pip install huggingface-hub"
-        exit 1
+        echo "  📥 huggingface-cli not found, installing..."
+        pip install -q huggingface-hub 2>/dev/null
+        if ! command -v huggingface-cli &> /dev/null; then
+            echo "  ❌ Failed to install huggingface-cli"
+            echo "    Try manually: pip install huggingface-hub"
+            exit 1
+        fi
+        echo "  ✓ huggingface-cli installed"
+    else
+        echo "  ✓ huggingface-cli found"
     fi
-    echo "  ✓ huggingface-cli installed"
     
-    # Create models directory
-    mkdir -p "$MODELS_DIR"
     echo "  ✓ Models directory: $MODELS_DIR"
     echo ""
 }
