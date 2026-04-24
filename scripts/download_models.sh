@@ -136,18 +136,18 @@ check_requirements() {
         echo "  ⚠️ Could not determine disk space (continuing anyway)"
     fi
     
-    # Check huggingface-cli - install if missing
-    if ! command -v huggingface-cli &> /dev/null; then
-        echo "  📥 huggingface-cli not found, installing..."
+    # Check huggingface-hub Python module - install if missing
+    if ! python3 -c "import huggingface_hub" 2>/dev/null; then
+        echo "  📥 huggingface-hub not found, installing..."
         pip install -q huggingface-hub 2>/dev/null
-        if ! command -v huggingface-cli &> /dev/null; then
-            echo "  ❌ Failed to install huggingface-cli"
+        if ! python3 -c "import huggingface_hub" 2>/dev/null; then
+            echo "  ❌ Failed to install huggingface-hub"
             echo "    Try manually: pip install huggingface-hub"
             exit 1
         fi
-        echo "  ✓ huggingface-cli installed"
+        echo "  ✓ huggingface-hub installed"
     else
-        echo "  ✓ huggingface-cli found"
+        echo "  ✓ huggingface-hub module found"
     fi
     
     echo "  ✓ Models directory: $MODELS_DIR"
@@ -175,10 +175,11 @@ download_model() {
     
     mkdir -p "$local_dir"
     
-    if huggingface-cli download "$model_id" \
+    # Use Python module approach since huggingface-cli might not be in PATH
+    if python3 -m huggingface_hub.cli download "$model_id" \
         --local-dir "$local_dir" \
         --local-dir-use-symlinks False \
-        --cache-dir "$HOME/.cache/huggingface"; then
+        --cache-dir "$HOME/.cache/huggingface" 2>/dev/null; then
         echo "   ✓ Downloaded successfully"
         return 0
     else
