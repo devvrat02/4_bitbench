@@ -15,9 +15,9 @@
 # ─────────────────────────────────────────────────────────────────────────────
 #
 #  This SLURM script tests all 3 NF4 models:
-#  - Llama-3.1-8B-nf4
-#  - Qwen2.5-7B-nf4
-#  - Mistral-7B-Instruct-nf4
+#  - Phi-3-medium (✅ NO PERMISSION REQUIRED)
+#  - Qwen2.5-7B-Instruct (✅ NO PERMISSION REQUIRED)
+#  - Mistral-7B-Instruct (✅ NO PERMISSION REQUIRED)
 #
 #  Usage:
 #    sbatch submit_nf4_test_batch.sh                      # Default settings
@@ -179,7 +179,7 @@ echo ""
 # ── Test Mode Parsing ─────────────────────────────────────────────────────────
 # Allow override via environment variables
 TEST_MODE="${TEST_MODE:-full}"
-MODELS="${MODELS:-Llama-3.1-8B-nf4,Qwen2.5-7B-nf4,Mistral-7B-Instruct-nf4}"
+MODELS="${MODELS:-Phi-3-medium,Qwen2.5-7B-Instruct,Mistral-7B-Instruct}"
 BATCH_SIZES="${BATCH_SIZES:-32,64,128}"
 NUM_SAMPLES="${NUM_SAMPLES:-100}"
 OUTPUT_TOKENS="${OUTPUT_TOKENS:-256}"

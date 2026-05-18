@@ -74,7 +74,7 @@ Override test parameters via environment variables before submission:
 
 ```bash
 # Test specific models
-export MODELS="Llama-3.1-8B-nf4,Qwen2.5-7B-nf4"
+export MODELS="Phi-3-medium,Qwen2.5-7B-Instruct"
 sbatch scripts/submit_nf4_test_batch.sh
 
 # Custom batch sizes
@@ -174,7 +174,7 @@ sbatch --time=24:00:00 --gres=gpu:1 scripts/submit_nf4_test_batch.sh
 
 ```bash
 # Test each model separately with custom resources
-for model in "Llama-3.1-8B-nf4" "Qwen2.5-7B-nf4" "Mistral-7B-Instruct-nf4"; do
+for model in "Phi-3-medium" "Qwen2.5-7B-Instruct" "Mistral-7B-Instruct"; do
     export MODELS="$model"
     export BATCH_SIZES="32,64,128"
     sbatch -J "nf4_test_$model" scripts/submit_nf4_test_batch.sh
@@ -205,11 +205,11 @@ Results are organized with job ID and timestamp:
 
 ```
 results/
-├── nf4_Llama-3.1-8B-nf4_20250518_120000/
+├── nf4_Phi-3-medium_20250518_120000/
 │   ├── results_batch_32.json
 │   ├── results_batch_64.json
 │   └── results_batch_128.json
-├── nf4_Qwen2.5-7B-nf4_20250518_121530/
+├── nf4_Qwen2.5-7B-Instruct_20250518_121530/
 │   └── results_batch_*.json
 └── nf4_Mistral-7B-Instruct-nf4_20250518_123045/
     └── results_batch_*.json

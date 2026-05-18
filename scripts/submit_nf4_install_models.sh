@@ -67,24 +67,41 @@ PROJECT_DIR="${PROJECT_DIR:-$HOME/research/TokenPowerBench}"
 MODEL_DIR="${MODEL_DIR:-$HOME/models}"
 LOG_DIR="${LOG_DIR:-$PROJECT_DIR/logs}"
 
-# The 3 NF4 models to install
+# The 3 NF4 models to install (default: open-access models, no permission required!)
+# These are publicly available without requesting access from authors
 declare -a MODELS=(
-    "Llama-3.1-8B-nf4"
-    "Qwen2.5-7B-nf4"
-    "Mistral-7B-Instruct-nf4"
+    "Mistral-7B-Instruct"
+    "Qwen2.5-7B-Instruct"
+    "Phi-3-medium"
 )
 
-# Hugging Face model IDs
+# Override models via environment variable before submitting:
+# export MODELS_CUSTOM="Falcon-7B,DeepSeek-7B,Mistral-7B-Instruct"
+if [ -n "$MODELS_CUSTOM" ]; then
+    IFS=',' read -ra MODELS <<< "$MODELS_CUSTOM"
+fi
+
+# Hugging Face model IDs (all open-access by default - no permission needed!)
 declare -A HF_MODELS
-HF_MODELS["Llama-3.1-8B-nf4"]="meta-llama/Llama-3.1-8B"
-HF_MODELS["Qwen2.5-7B-nf4"]="Qwen/Qwen2.5-7B-Instruct"
-HF_MODELS["Mistral-7B-Instruct-nf4"]="mistralai/Mistral-7B-Instruct-v0.2"
+# Open-access models (✅ NO PERMISSION REQUIRED)
+HF_MODELS["Mistral-7B-Instruct"]="mistralai/Mistral-7B-Instruct-v0.2"
+HF_MODELS["Qwen2.5-7B-Instruct"]="Qwen/Qwen2.5-7B-Instruct"
+HF_MODELS["Phi-3-medium"]="microsoft/Phi-3-medium-4k-instruct"
+HF_MODELS["Falcon-7B"]="tiiuae/falcon-7b-instruct"
+HF_MODELS["DeepSeek-7B"]="deepseek-ai/deepseek-llm-7b-base"
+# Gated models (❌ REQUIRE PERMISSION from authors)
+HF_MODELS["Llama-3.1-8B"]="meta-llama/Llama-3.1-8B"
+HF_MODELS["Llama-2-7B"]="meta-llama/Llama-2-7b-hf"
 
 # Model sizes (approximate)
 declare -A MODEL_SIZES
-MODEL_SIZES["Llama-3.1-8B-nf4"]="15-20GB"
-MODEL_SIZES["Qwen2.5-7B-nf4"]="15-20GB"
-MODEL_SIZES["Mistral-7B-Instruct-nf4"]="15-20GB"
+MODEL_SIZES["Mistral-7B-Instruct"]="14-16GB"
+MODEL_SIZES["Qwen2.5-7B-Instruct"]="15-18GB"
+MODEL_SIZES["Phi-3-medium"]="14-16GB"
+MODEL_SIZES["Falcon-7B"]="14-16GB"
+MODEL_SIZES["DeepSeek-7B"]="14-16GB"
+MODEL_SIZES["Llama-3.1-8B"]="15-20GB"
+MODEL_SIZES["Llama-2-7B"]="13-15GB"
 
 echo "  Project Dir : $PROJECT_DIR"
 echo "  Model Dir   : $MODEL_DIR"

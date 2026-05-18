@@ -15,10 +15,10 @@ Both scripts will:
 
 ## Default Models
 
-The suite tests these 3 NF4 models:
-- `Llama-3.1-8B-nf4` (meta-llama/Llama-3.1-8B)
-- `Qwen2.5-7B-nf4` (Qwen/Qwen2.5-7B-Instruct)
-- `Mistral-7B-Instruct-nf4` (mistralai/Mistral-7B-Instruct-v0.2)
+The suite tests these 3 open-access NF4 models (✅ NO PERMISSION REQUIRED):
+- `Phi-3-medium` (microsoft/Phi-3-medium-4k-instruct)
+- `Qwen2.5-7B-Instruct` (Qwen/Qwen2.5-7B-Instruct)
+- `Mistral-7B-Instruct` (mistralai/Mistral-7B-Instruct-v0.2)
 
 ## Quick Start
 
@@ -38,7 +38,7 @@ bash scripts/test_nf4_models.sh --download-only
 bash scripts/test_nf4_models.sh --benchmark-only
 
 # Test specific models
-bash scripts/test_nf4_models.sh --models Llama-3.1-8B-nf4,Qwen2.5-7B-nf4
+bash scripts/test_nf4_models.sh --models Phi-3-medium,Qwen2.5-7B-Instruct
 
 # Custom parameters
 bash scripts/test_nf4_models.sh \
@@ -63,7 +63,7 @@ bash scripts/test_nf4_models.sh \
 .\scripts\test_nf4_models.ps1 -BenchmarkOnly
 
 # Custom models
-.\scripts\test_nf4_models.ps1 -Models "Llama-3.1-8B-nf4","Qwen2.5-7B-nf4"
+.\scripts\test_nf4_models.ps1 -Models "Phi-3-medium","Qwen2.5-7B-Instruct"
 
 # Custom parameters
 .\scripts\test_nf4_models.ps1 `
@@ -142,7 +142,7 @@ Output:
 Configuration:
   Model Directory:   /home/user/models
   Project Directory: /home/user/TokenPowerBench
-  Models to Test:    Llama-3.1-8B-nf4 Qwen2.5-7B-nf4 Mistral-7B-Instruct-nf4
+  Models to Test:    Phi-3-medium Qwen2.5-7B-Instruct Mistral-7B-Instruct
   Batch Sizes:       32,64,128
   Samples:           100
   Output Tokens:     256
@@ -151,18 +151,18 @@ Configuration:
 ═══════════════════════════════════════════════════════════════════════
 ✅ Checking Model Availability
 
-➜ Checking Llama-3.1-8B-nf4...
-⚠️  Llama-3.1-8B-nf4 is NOT available
+➜ Checking Phi-3-medium...
+⚠️  Phi-3-medium is NOT available
 
-➜ Downloading Llama-3.1-8B-nf4...
-✅ Downloaded Llama-3.1-8B-nf4
+➜ Downloading Phi-3-medium...
+✅ Downloaded Phi-3-medium
 
 [... continues for other models ...]
 
 ═══════════════════════════════════════════════════════════════════════
 ✅ Running Benchmarks
 
-[Results saved to results/nf4_Llama-3.1-8B-nf4_YYYYMMDD_HHMMSS/]
+[Results saved to results/nf4_Phi-3-medium_YYYYMMDD_HHMMSS/]
 ```
 
 ### Example 2: Large-Scale Benchmarking
@@ -214,14 +214,14 @@ Results are saved with timestamps:
 
 ```
 results/
-├── nf4_Llama-3.1-8B-nf4_20250518_120000/
+├── nf4_Phi-3-medium_20250518_120000/
 │   ├── results_batch_32.json
 │   ├── results_batch_64.json
 │   └── results_batch_128.json
-├── nf4_Qwen2.5-7B-nf4_20250518_121530/
+├── nf4_Qwen2.5-7B-Instruct_20250518_121530/
 │   ├── results_batch_32.json
 │   └── ...
-└── nf4_Mistral-7B-Instruct-nf4_20250518_123045/
+└── nf4_Mistral-7B-Instruct_20250518_123045/
     └── ...
 ```
 

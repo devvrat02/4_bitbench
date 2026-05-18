@@ -22,18 +22,18 @@ PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 LOG_DIR="$PROJECT_DIR/logs"
 RESULTS_DIR="$PROJECT_DIR/results"
 
-# Default 3 NF4 models to test
+# Default 3 open-access NF4 models to test (✅ NO PERMISSION REQUIRED!)
 MODELS_TO_TEST=(
-    "Llama-3.1-8B-nf4"
-    "Qwen2.5-7B-nf4"
-    "Mistral-7B-Instruct-nf4"
+    "Phi-3-medium"
+    "Qwen2.5-7B-Instruct"
+    "Mistral-7B-Instruct"
 )
 
-# Model source mappings (HuggingFace model IDs)
+# Model source mappings (HuggingFace model IDs - all open-access)
 declare -A MODEL_SOURCE
-MODEL_SOURCE["Llama-3.1-8B-nf4"]="meta-llama/Llama-3.1-8B"
-MODEL_SOURCE["Qwen2.5-7B-nf4"]="Qwen/Qwen2.5-7B-Instruct"
-MODEL_SOURCE["Mistral-7B-Instruct-nf4"]="mistralai/Mistral-7B-Instruct-v0.2"
+MODEL_SOURCE["Phi-3-medium"]="microsoft/Phi-3-medium-4k-instruct"
+MODEL_SOURCE["Qwen2.5-7B-Instruct"]="Qwen/Qwen2.5-7B-Instruct"
+MODEL_SOURCE["Mistral-7B-Instruct"]="mistralai/Mistral-7B-Instruct-v0.2"
 
 # Benchmark parameters
 BATCH_SIZES="32,64,128"

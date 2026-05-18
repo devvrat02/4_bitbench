@@ -17,7 +17,7 @@ param(
     [switch]$CheckOnly,
     [switch]$DownloadOnly,
     [switch]$BenchmarkOnly,
-    [string[]]$Models = @("Llama-3.1-8B-nf4", "Qwen2.5-7B-nf4", "Mistral-7B-Instruct-nf4"),
+    [string[]]$Models = @("Phi-3-medium", "Qwen2.5-7B-Instruct", "Mistral-7B-Instruct"),
     [string]$ModelDir = "$env:USERPROFILE\models",
     [string]$BatchSizes = "32,64,128",
     [int]$NumSamples = 100,
@@ -54,7 +54,7 @@ EXAMPLES:
     .\test_nf4_models.ps1 -CheckOnly
 
     # Test specific models
-    .\test_nf4_models.ps1 -Models "Llama-3.1-8B-nf4","Qwen2.5-7B-nf4"
+    .\test_nf4_models.ps1 -Models "Phi-3-medium","Qwen2.5-7B-Instruct"
 
     # Download missing and run benchmarks with custom parameters
     .\test_nf4_models.ps1 -BatchSizes "64,128,256" -NumSamples 500
@@ -67,11 +67,11 @@ $ProjectDir = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
 $LogDir = Join-Path $ProjectDir "logs"
 $ResultsDir = Join-Path $ProjectDir "results"
 
-# Model source mappings
+# Model source mappings (all open-access - no permission needed!)
 $ModelSource = @{
-    "Llama-3.1-8B-nf4"         = "meta-llama/Llama-3.1-8B"
-    "Qwen2.5-7B-nf4"           = "Qwen/Qwen2.5-7B-Instruct"
-    "Mistral-7B-Instruct-nf4"  = "mistralai/Mistral-7B-Instruct-v0.2"
+    "Phi-3-medium"         = "microsoft/Phi-3-medium-4k-instruct"
+    "Qwen2.5-7B-Instruct"  = "Qwen/Qwen2.5-7B-Instruct"
+    "Mistral-7B-Instruct"  = "mistralai/Mistral-7B-Instruct-v0.2"
 }
 
 # ── Helper Functions ──────────────────────────────────────────────────────────

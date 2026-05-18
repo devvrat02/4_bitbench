@@ -58,11 +58,11 @@ The script installs these 3 NF4 models:
 
 | Model | Size | Source |
 |-------|------|--------|
-| Llama-3.1-8B-nf4 | ~15-20 GB | meta-llama/Llama-3.1-8B |
-| Qwen2.5-7B-nf4 | ~15-20 GB | Qwen/Qwen2.5-7B-Instruct |
-| Mistral-7B-Instruct-nf4 | ~15-20 GB | mistralai/Mistral-7B-Instruct-v0.2 |
+| Phi-3-medium | ~14-16 GB | microsoft/Phi-3-medium-4k-instruct |
+| Qwen2.5-7B-Instruct | ~15-18 GB | Qwen/Qwen2.5-7B-Instruct |
+| Mistral-7B-Instruct | ~14-16 GB | mistralai/Mistral-7B-Instruct-v0.2 |
 
-**Total: ~50-60 GB disk space needed**
+**Total: ~50-60 GB disk space needed** ✅ **All open-access - NO PERMISSION REQUIRED!**
 
 ---
 
