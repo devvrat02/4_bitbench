@@ -49,7 +49,7 @@ export NCCL_TIMEOUT=1800
 mkdir -p logs results
 
 # ── Navigate to project directory ─────────────────────────────────────────────
-PROJECT_DIR="$HOME/research/TokenPowerBench"
+PROJECT_DIR="$HOME/research/report/4_bitbench"
 cd "$PROJECT_DIR" || exit 1
 
 echo "=== Environment Info ==="

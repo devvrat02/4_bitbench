@@ -53,7 +53,7 @@ export CUDA_VISIBLE_DEVICES="0,1,2,3,4,5,6,7"
 mkdir -p logs results
 
 # ── Navigate to project directory ─────────────────────────────────────────────
-PROJECT_DIR="$HOME/research/TokenPowerBench"
+PROJECT_DIR="$HOME/research/report/4_bitbench"
 cd "$PROJECT_DIR" || exit 1
 
 echo "=== Environment Info ==="
