@@ -24,11 +24,11 @@ echo ""
 
 # ── Configuration ─────────────────────────────────────────────────────────────
 
-# Experiment configurations
+# Experiment configurations (using open-access NF4 models - no permission required!)
 declare -a MODELS=(
-    "Llama-3.1-8B-nf4"
-    "Mistral-7B-nf4"
-    "Qwen-7B-nf4"
+    "Phi-3-medium"
+    "Mistral-7B-Instruct"
+    "Qwen2.5-7B-Instruct"
 )
 
 declare -a DATASETS=(

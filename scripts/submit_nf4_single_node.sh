@@ -92,12 +92,12 @@ echo ""
 
 # Auto-detect model - prefer available models in order
 MODEL_PATH=""
-if [ -d "$MODEL_DIR/Phi-3-medium" ]; then
+if [ -d "$MODEL_DIR/Mistral-7B-Instruct-v0.2" ]; then
+    MODEL_PATH="$MODEL_DIR/Mistral-7B-Instruct-v0.2"
+    echo "✓ Using Mistral-7B-Instruct-v0.2"
+elif [ -d "$MODEL_DIR/Phi-3-medium" ]; then
     MODEL_PATH="$MODEL_DIR/Phi-3-medium"
     echo "✓ Using Phi-3-medium"
-elif [ -d "$MODEL_DIR/Mistral-7B-Instruct" ]; then
-    MODEL_PATH="$MODEL_DIR/Mistral-7B-Instruct"
-    echo "✓ Using Mistral-7B-Instruct"
 elif [ -d "$MODEL_DIR/Qwen2.5-7B-Instruct" ]; then
     MODEL_PATH="$MODEL_DIR/Qwen2.5-7B-Instruct"
     echo "✓ Using Qwen2.5-7B-Instruct"

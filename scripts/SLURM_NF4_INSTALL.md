@@ -194,7 +194,7 @@ Adjust if needed:
 🔍 PHASE 1: CHECKING MODEL AVAILABILITY
 ════════════════════════════════════════════════════════════════════
 
-  ✅ Llama-3.1-8B-nf4 (15-20GB) - INSTALLED
+  ✅ Phi-3-medium (14-16GB) - INSTALLED
   ⏳ Qwen2.5-7B-nf4 (15-20GB) - MISSING (will download)
   ⏳ Mistral-7B-Instruct-nf4 (15-20GB) - MISSING (will download)
 
@@ -214,17 +214,17 @@ Downloading Qwen2.5-7B-nf4...
 ✅ PHASE 3: MODEL VERIFICATION
 ════════════════════════════════════════════════════════════════════
 
-Verifying Llama-3.1-8B-nf4...
-✓ Model verified: llama (4096 hidden)
+Verifying Phi-3-medium...
+✓ Model verified: phi (3072 hidden)
 
 [... continues for all models ...]
 
 📁 MODEL INSTALLATION REPORT
 ════════════════════════════════════════════════════════════════════
 
-  ✅ Llama-3.1-8B-nf4
-     Location: /home/user/models/Llama-3.1-8B-nf4
-     Size    : 16G
+  ✅ Phi-3-medium
+     Location: /home/user/models/Phi-3-medium
+     Size    : 14G
   ✅ Qwen2.5-7B-nf4
      Location: /home/user/models/Qwen2.5-7B-nf4
      Size    : 18G
@@ -261,13 +261,13 @@ After completion, models are organized:
 
 ```
 ~/models/
-├── Llama-3.1-8B-nf4/
+├── Phi-3-medium/
 │   ├── config.json
 │   ├── model.safetensors (or pytorch_model.bin)
 │   ├── tokenizer.model
 │   ├── generation_config.json
 │   └── ... (other files)
-├── Qwen2.5-7B-nf4/
+├── Qwen2.5-7B-Instruct/
 │   └── ... (same structure)
 └── Mistral-7B-Instruct-nf4/
     └── ... (same structure)
@@ -412,7 +412,7 @@ After installation succeeds:
 
 2. **Test Specific Model**
    ```bash
-   export MODELS="Llama-3.1-8B-nf4"
+   export MODELS="Phi-3-medium"
    sbatch scripts/submit_nf4_test_batch.sh
    ```
 

@@ -44,7 +44,7 @@ MODEL_DIR="${MODEL_DIR:-$HOME/models}"
 OUTPUT_DIR="${OUTPUT_DIR:-$PROJECT_DIR/results}"
 
 # Benchmark parameters
-MODELS="${MODELS:-Llama-3.1-8B-nf4}"
+MODELS="${MODELS:-Phi-3-medium}"
 DATASETS="${DATASETS:-alpaca}"
 BATCH_SIZES="${BATCH_SIZES:-32,64,128}"
 MAX_TOKENS="${MAX_TOKENS:-256}"
